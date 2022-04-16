@@ -11,5 +11,15 @@ namespace ConsoleLibrary
         static void Main(string[] args)
         {
         }
+
+        static void CreateUser()
+        {
+            // TODO: Implement CreateUser().
+        }
+
+        static void CreateRole()
+        {
+            // TODO: Implement CreateRole().
+        }
     }
 }
