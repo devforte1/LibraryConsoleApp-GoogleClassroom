@@ -6,12 +6,7 @@ using System.Threading.Tasks;
 
 namespace ClassLibraryDatabase
 {
-    public class RoleDTO
+    internal class MockUser
     {
-        public RoleDTO()
-        {
-            // TODO: Implement RoleDTO() constructor.
-        }
-
     }
 }

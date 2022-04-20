@@ -49,11 +49,27 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="UnitTest1.cs" />
+    <Compile Include="UnitTest-ConsoleLibrary.cs" />
+    <Compile Include="UnitTest-ClassLibraryDatabase.cs" />
+    <Compile Include="UnitTest-ClassLibraryCommon.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\ClassLibraryCommon\ClassLibraryCommon.csproj">
+      <Project>{911ac84c-5706-4888-ad53-6ccb77314ed9}</Project>
+      <Name>ClassLibraryCommon</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ClassLibraryDatabase\ClassLibraryDatabase.csproj">
+      <Project>{1c91d37b-67ad-498e-bc3c-7b4ea721f099}</Project>
+      <Name>ClassLibraryDatabase</Name>
+    </ProjectReference>
+    <ProjectReference Include="..\ConsoleLibrary\ConsoleLibrary.csproj">
+      <Project>{53a59ed5-8a4d-4cd8-8e92-aa4d62d07b7b}</Project>
+      <Name>ConsoleLibrary</Name>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets" Condition="Exists('$(VSToolsPath)\TeamTest\Microsoft.TestTools.targets')" />
   <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />

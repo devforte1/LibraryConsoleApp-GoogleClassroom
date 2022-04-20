@@ -4,10 +4,10 @@ using System;
 namespace UnitTestLibrary
 {
     [TestClass]
-    public class UnitTest1
+    public class UnitTestConsoleLibrary
     {
         [TestMethod]
-        public void TestMethod1()
+        public void TestMethodConsoleLibrary()
         {
         }
     }
