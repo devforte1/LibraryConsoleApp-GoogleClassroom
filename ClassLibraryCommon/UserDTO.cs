@@ -13,15 +13,18 @@ namespace ClassLibraryDatabase
         private string _userName;
         private string _password;
         const string _filePath = "c:\\temp\\ConsoleAppUsers.txt";
+        private bool _isAdmin;
 
         public int UserId { get => _userId; }
         public string Name { get => _userName; set => _userName = value; }
         public string Password { get => _password; set => _password = value; }
+        public bool IsAdmin { get => _isAdmin; set => _isAdmin = value; }
 
-        public UserDTO(string userName,string password,int userId=0)
+        public UserDTO(string userName,string password,int userId=0,bool isAdmin=false)
         {
             _userName = userName;
             _password = password;
+            _isAdmin = isAdmin;
 
             if (userId == 0)
             {

@@ -87,7 +87,7 @@ namespace ClassLibraryDatabase
             return roleList;
         }
 
-        bool SaveUsers(List<UserDTO> userList,string filePath)
+        bool SaveUserList(List<UserDTO> userList,string filePath)
         {
              Console.WriteLine($"SaveUsers()::Write UserList to file {filePath}.");
 
@@ -116,7 +116,32 @@ namespace ClassLibraryDatabase
             return true;
         }
 
-        bool SaveRoles(List<RoleDTO> roleList, string filePath)
+        public bool SaveUser(List<UserDTO> userList, UserDTO newUser)
+        {
+            Console.WriteLine($"MockDb.SaveUser()::Save user to file {_usersFilePath}.");
+
+            
+            
+            try
+            {
+                StreamWriter UserDtoWriter = new StreamWriter(_usersFilePath);
+                UserDtoWriter.WriteLine(newUser.UserId.ToString(), newUser.Name, newUser.Password);
+
+                UserDtoWriter.Close();
+                UserDtoWriter.Dispose();
+                UserDtoWriter = null;
+            }
+            catch (Exception ex) 
+            {
+                Console.WriteLine($"Exception occurred during user save to file {_usersFilePath}.");
+                Console.WriteLine(ex.Message);
+                return false;
+            }
+
+            return true;
+        }
+
+        bool SaveRoleList(List<RoleDTO> roleList, string filePath)
         {
             Console.WriteLine($"SaveRoles()::Write RoleList to file {filePath}.");
 
@@ -145,15 +170,13 @@ namespace ClassLibraryDatabase
             return true;
         }
 
-UserDTO GetUser(string name)
+        UserDTO GetUser(string name)
 {
 throw new NotImplementedException();
 }
 
-RoleDTO GetRole(string roleName)
+        RoleDTO GetRole(string roleName)
 { throw new NotImplementedException(); 
 }
-
-
-}
+    }
 }
