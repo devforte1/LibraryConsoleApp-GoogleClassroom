@@ -9,29 +9,61 @@ namespace ClassLibraryDatabase
 {   
     public class MockDb
     {
-        private string _rolesFilePath = "c:\\temp\\ConsoleAppRoles.txt";
-        private string _usersFilePath = "c:\\temp\\ConsoleAppUsers.txt";
+        private string _rolesFilePath = "ConsoleAppRoles.txt";
+        private string _usersFilePath = "ConsoleAppUsers.txt";
 
-        public List<UserDTO> GetUsers()
+        public List<string[]> GetUsers()
         {
-            Console.WriteLine($"GetUsers()::Get saved users from {_usersFilePath}");
-            List<UserDTO> userList = new List<UserDTO>();
+            List<string[]> userList = new List<string[]>();
 
             if ((File.Exists(_usersFilePath) && (!(File.ReadAllText(_usersFilePath) == ""))))
             {
-                StreamReader UserListReader = new StreamReader(_usersFilePath);
+                string userVal = "";
+                string[] user;
+
+                using (StreamReader UserListReader = new StreamReader(_usersFilePath))
+                {
+                    try
+                    {
+                        while (!UserListReader.EndOfStream)
+                        {
+                            userVal = UserListReader.ReadLine();
+                            user = userVal.Split(',');
+                            userList.Add(user);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine("Unable to access User datastore.");
+                    }
+                    finally
+                    {
+                        UserListReader.Close();
+                        UserListReader.Dispose();
+                    }
+                }
+            }
+
+            return userList;
+        }
+
+
+        public List<string[]> GetRoles()
+        {
+            List<string[]> roleList = new List<string[]>();
+
+            if ((File.Exists(_rolesFilePath) && (!(File.ReadAllText(_rolesFilePath) == ""))))
+            {
+                StreamReader RoleListReader = new StreamReader(_rolesFilePath);
 
                 try
                 {
-                    while (!UserListReader.EndOfStream)
+                    while (!RoleListReader.EndOfStream)
                     {
-                        string userVal = UserListReader.ReadLine();
-                        string[] userProperties = userVal.Split(',');
-                        UserDTO user = new UserDTO(userProperties[0],userProperties[1]);
-                        userList.Add(user);
-                        Console.WriteLine($"User {user.Name} retrieved from {_usersFilePath}.");
+                        string roleVal = RoleListReader.ReadLine();
+                        string[] role = roleVal.Split(',');
+                        roleList.Add(role);
                     }
-                    Console.WriteLine(" ");
                 }
                 catch (Exception ex)
                 {
@@ -39,144 +71,63 @@ namespace ClassLibraryDatabase
                 }
                 finally
                 {
-                    UserListReader.Close();
-                    UserListReader.Dispose();
-                    UserListReader = null;
-
+                    RoleListReader.Close();
+                    RoleListReader.Dispose();
+                    RoleListReader = null;
                 }
             }
-
-            return userList;
-
-        }
-
-        public List<RoleDTO> GetRoles()
-        {
-            Console.WriteLine($"GetRoles()::Get saved roles from {_rolesFilePath}");
-            List<RoleDTO> roleList = new List<RoleDTO>();
-
-            if ((File.Exists(_rolesFilePath) && (!(File.ReadAllText(_rolesFilePath) == ""))))
-            {
-                StreamReader RolesListReader = new StreamReader(_rolesFilePath);
-                
-                try
-                {
-                    while (!RolesListReader.EndOfStream)
-                    {
-                        string roleVal = RolesListReader.ReadLine();
-                        string[] roleProperties = roleVal.Split(',');
-                        RoleDTO role = new RoleDTO(roleProperties[0]);
-                        roleList.Add(role);
-                        Console.WriteLine($"Role {role.Name} retrieved from {_rolesFilePath}.");
-                    }
-                    Console.WriteLine(" ");
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine("Unable to access Role datastore.");
-                }
-                finally
-                {
-                    RolesListReader.Close();
-                    RolesListReader.Dispose();
-                    RolesListReader = null;
-
-                }
-            }
-
+            
             return roleList;
-        }
+     }
 
-        bool SaveUserList(List<UserDTO> userList,string filePath)
+        public int GetRoleId()
         {
-             Console.WriteLine($"SaveUsers()::Write UserList to file {filePath}.");
+            int maxId = 0;
 
-            if ((File.Exists(_usersFilePath) && (!(File.ReadAllText(_usersFilePath) == ""))))
+            // Access User file.
+            StreamReader MyRoleListReader = new StreamReader(_rolesFilePath);
+
+            // Increment and return the next unique value.
+            while (!MyRoleListReader.EndOfStream)
             {
-                try
+                string roleVal = MyRoleListReader.ReadLine();
+                string[] roleProperties = roleVal.Split(',');
+
+                if (int.Parse(roleProperties[1]) > maxId)
                 {
-                    StreamWriter UserListWriter = new StreamWriter(filePath);
-                    foreach (UserDTO item in userList)
-                    {
-                        UserListWriter.WriteLine($"{item.Name}, {item.Password}, {item.UserId}");
-                    }
-                    Console.WriteLine(" ");
-                    UserListWriter.Close();
-                    UserListWriter.Dispose();
-                    UserListWriter = null;
-                }
-                catch(Exception ex)
-                {
-                    Console.WriteLine($"SaveUsers()::Unable to write UserList to file { filePath }");
-                    Console.WriteLine(ex.Message);
-                    return false;
+                    maxId = int.Parse(roleProperties[1]);
                 }
             }
 
-            return true;
+            MyRoleListReader.Close();
+            MyRoleListReader.Dispose();
+
+            return (maxId + 1);
         }
 
-        public bool SaveUser(List<UserDTO> userList, UserDTO newUser)
+        public int GetUserId()
         {
-            Console.WriteLine($"MockDb.SaveUser()::Save user to file {_usersFilePath}.");
+            int maxId = 0;
 
-            
-            
-            try
+            // Access User file.
+            StreamReader MyUserListReader = new StreamReader(_usersFilePath);
+
+            // Increment and return the next unique value.
+            while (!MyUserListReader.EndOfStream)
             {
-                StreamWriter UserDtoWriter = new StreamWriter(_usersFilePath);
-                UserDtoWriter.WriteLine(newUser.UserId.ToString(), newUser.Name, newUser.Password);
+                string userVal = MyUserListReader.ReadLine();
+                string[] userProperties = userVal.Split(',');
 
-                UserDtoWriter.Close();
-                UserDtoWriter.Dispose();
-                UserDtoWriter = null;
-            }
-            catch (Exception ex) 
-            {
-                Console.WriteLine($"Exception occurred during user save to file {_usersFilePath}.");
-                Console.WriteLine(ex.Message);
-                return false;
-            }
-
-            return true;
-        }
-
-        bool SaveRoleList(List<RoleDTO> roleList, string filePath)
-        {
-            Console.WriteLine($"SaveRoles()::Write RoleList to file {filePath}.");
-
-            if (File.Exists(filePath) && (!(File.ReadAllText(filePath) == "")))
-            {
-                try
+                if (int.Parse(userProperties[2]) > maxId)
                 {
-                    StreamWriter RoleListWriter = new StreamWriter(filePath);
-                    foreach (RoleDTO item in roleList)
-                    {
-                        RoleListWriter.WriteLine($"{item.Name},  {item.RoleId}");
-                    }
-                    Console.WriteLine(" ");
-                    RoleListWriter.Close();
-                    RoleListWriter.Dispose();
-                    RoleListWriter = null;
-                }
-                catch (Exception ex)
-                {
-                    Console.WriteLine($"SaveUsers()::Unable to write UserList to file { filePath }.");
-                    Console.WriteLine(ex.Message);
-                    return false;
+                    maxId = int.Parse(userProperties[2]);
                 }
             }
 
-            return true;
+            MyUserListReader.Close();
+            MyUserListReader.Dispose();
+
+            return (maxId + 1);
         }
-
-        UserDTO GetUser(string name)
-{
-throw new NotImplementedException();
-}
-
-        RoleDTO GetRole(string roleName)
-{ throw new NotImplementedException(); 
-}
     }
 }

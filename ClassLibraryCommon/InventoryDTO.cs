@@ -46,6 +46,9 @@ namespace ClassLibraryCommon
                 }
             }
 
+            InventoryListReader.Close();
+            InventoryListReader.Dispose();
+
             // Increment and return the next unique value.
             return (maxId + 1);
         }
