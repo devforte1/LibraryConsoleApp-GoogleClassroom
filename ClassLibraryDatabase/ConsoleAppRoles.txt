@@ -1,4 +1,0 @@
-Guest,1
-Administrator,2
-Librarian,3
-Patron,4

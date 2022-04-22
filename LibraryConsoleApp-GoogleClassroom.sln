@@ -13,6 +13,12 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ConsoleLibrary", "ConsoleLi
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "UnitTestLibrary", "UnitTestLibrary\UnitTestLibrary.csproj", "{4F702F61-D6A8-4437-BE5D-89AF931F3312}"
 EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "datafiles", "datafiles", "{1F0F2A27-BB4C-42F5-A78B-E11B3FCFDB51}"
+	ProjectSection(SolutionItems) = preProject
+		..\datafiles\ConsoleAppRoles.txt = ..\datafiles\ConsoleAppRoles.txt
+		..\datafiles\ConsoleAppUsers.txt = ..\datafiles\ConsoleAppUsers.txt
+	EndProjectSection
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -38,6 +44,9 @@ Global
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{1F0F2A27-BB4C-42F5-A78B-E11B3FCFDB51} = {A0DB0DE6-ECE5-43E7-B1CC-EDBC83886553}
 	EndGlobalSection
 	GlobalSection(ExtensibilityGlobals) = postSolution
 		SolutionGuid = {499A5B2C-9073-4DFE-8FCB-69A9D160432E}

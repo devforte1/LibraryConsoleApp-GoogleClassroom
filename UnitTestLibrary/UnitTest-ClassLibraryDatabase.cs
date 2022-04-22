@@ -24,6 +24,7 @@ namespace UnitTestLibrary
         public void TestMethodValidateUserRecordCount()
         {
             MockDb db = new MockDb();
+            db.InitializeUsers();   // Initialize user table for unit test.
             List<string[]> userList = db.GetUsers();
 
             Assert.AreEqual(userList.Count, 3);
@@ -50,21 +51,25 @@ namespace UnitTestLibrary
         public void TestMethodCreateRoleList()
         {
             MockDb libraryDb = new MockDb();
-            // List<RoleDTO> roleList = libraryDb.GetRoles();
+            List<string[]> roleList = libraryDb.GetRoles();
 
             // RoleDTO Unit Tests.
-            //Assert.IsNotNull(roleList);
-            //Assert.AreEqual(4, roleList.Count);
+            Assert.IsNotNull(roleList);
+            Assert.AreEqual(4, roleList.Count);
         }
 
         [TestMethod]
         public void TestMethodValidateRoleId()
         {
             MockDb libraryDb = new MockDb();
-            // List<RoleDTO> roleList = libraryDb.GetRoles();
+             List<string[]> roleList = libraryDb.GetRoles();
 
+            for(int i=1; i<=roleList.Count; i++)
+            {
+                Assert.AreEqual(int.Parse(roleList[i-1][1]), i);
+            }
             // RoleDTO Unit Tests.
-            //Assert.AreEqual(roleList[0].RoleId, 1);
+            
             //Assert.AreEqual(roleList[1].RoleId, 2);
             //Assert.AreEqual(roleList[2].RoleId, 3);
             //Assert.AreEqual(roleList[3].RoleId, 4);
@@ -73,16 +78,14 @@ namespace UnitTestLibrary
         [TestMethod]
         public void TestMethodSaveUser()
         {
-            MockDb libraryDb = new MockDb();
-            // List<UserDTO> userList = libraryDb.GetUsers();
+            MockDb db = new MockDb();
+            List<string[]> userList = db.GetUsers();
 
-            UserDTO testUser = new UserDTO("testUser4", "testPass4");
-
-            // bool result = libraryDb.SaveUser(userList, testUser);
-            // Assert.IsTrue(result);
+            bool result = db.AddUser("testUser4", "testPass4",1);
+            Assert.IsTrue(result);
             
             // Reinitialize the user list to baseline.
-            // libraryDb.InitializeUserList();
+            db.InitializeUsers();
         }
     }
 }

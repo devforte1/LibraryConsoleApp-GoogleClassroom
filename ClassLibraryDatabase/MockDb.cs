@@ -9,13 +9,14 @@ namespace ClassLibraryDatabase
 {   
     public class MockDb
     {
-        private string _rolesFilePath = "ConsoleAppRoles.txt";
-        private string _usersFilePath = "ConsoleAppUsers.txt";
+        private string _rolesFilePath = "c:\\workspace\\datafiles\\ConsoleAppRoles.txt";
+        private string _usersFilePath = "c:\\workspace\\datafiles\\ConsoleAppUsers.txt";
 
         public List<string[]> GetUsers()
         {
             List<string[]> userList = new List<string[]>();
 
+            // Get active Library Helper users from data store (text file).
             if ((File.Exists(_usersFilePath) && (!(File.ReadAllText(_usersFilePath) == ""))))
             {
                 string userVal = "";
@@ -34,7 +35,9 @@ namespace ClassLibraryDatabase
                     }
                     catch (Exception ex)
                     {
+                        Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Unable to access User datastore.");
+                        Console.ForegroundColor = ConsoleColor.White;
                     }
                     finally
                     {
@@ -52,6 +55,7 @@ namespace ClassLibraryDatabase
         {
             List<string[]> roleList = new List<string[]>();
 
+            // Get Library Helper roles from data store (text file).
             if ((File.Exists(_rolesFilePath) && (!(File.ReadAllText(_rolesFilePath) == ""))))
             {
                 StreamReader RoleListReader = new StreamReader(_rolesFilePath);
@@ -67,7 +71,9 @@ namespace ClassLibraryDatabase
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("Unable to access User datastore.");
+                    Console.ForegroundColor = ConsoleColor.Red;
+                    Console.WriteLine("Unable to access Roles datastore.");
+                    Console.ForegroundColor = ConsoleColor.White;
                 }
                 finally
                 {
@@ -84,7 +90,7 @@ namespace ClassLibraryDatabase
         {
             int maxId = 0;
 
-            // Access User file.
+            // Access User data file.
             StreamReader MyRoleListReader = new StreamReader(_rolesFilePath);
 
             // Increment and return the next unique value.
@@ -110,24 +116,48 @@ namespace ClassLibraryDatabase
             int maxId = 0;
 
             // Access User file.
-            StreamReader MyUserListReader = new StreamReader(_usersFilePath);
-
-            // Increment and return the next unique value.
-            while (!MyUserListReader.EndOfStream)
+            using (StreamReader MyUserListReader = new StreamReader(_usersFilePath))
             {
-                string userVal = MyUserListReader.ReadLine();
-                string[] userProperties = userVal.Split(',');
-
-                if (int.Parse(userProperties[2]) > maxId)
+                // Increment and return the next unique value.
+                while (!MyUserListReader.EndOfStream)
                 {
-                    maxId = int.Parse(userProperties[2]);
+                    string userVal = MyUserListReader.ReadLine();
+                    string[] userProperties = userVal.Split(',');
+
+                    if (int.Parse(userProperties[2]) > maxId)
+                    {
+                        maxId = int.Parse(userProperties[2]);
+                    }
                 }
             }
 
-            MyUserListReader.Close();
-            MyUserListReader.Dispose();
-
             return (maxId + 1);
         }
+
+        public bool AddUser(string userName, string password,int id)
+        {
+            using (StreamWriter UserListWriter = new StreamWriter(_usersFilePath, true))
+            {
+                UserListWriter.WriteLine($"{userName},{password},{id}");
+            }
+
+            return true;
+        }
+
+        public bool InitializeUsers()
+        {
+            using (StreamWriter streamWriter = new StreamWriter(_usersFilePath,false))
+            {
+                string user1 = "user1,userPass1,1";
+                string user2 = "user2,userPass2,2";
+                string user3 = "user3,userPass3,3";
+                streamWriter.WriteLine(user1);
+                streamWriter.WriteLine(user2);
+                streamWriter.WriteLine(user3);
+            };
+            
+            return false;
+        }
+
     }
 }

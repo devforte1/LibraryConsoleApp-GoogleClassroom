@@ -29,10 +29,10 @@ namespace ClassLibraryCommon
             }
         }
 
-        //public bool AuthenticateUser(string username, string password)
-        //{
-        //    throw new NotImplementedException();
-        //}
+        public bool AuthenticateUser(string username, string password)
+        {
+            throw new NotImplementedException();
+        }
 
         static string GeneratePassword()
         {

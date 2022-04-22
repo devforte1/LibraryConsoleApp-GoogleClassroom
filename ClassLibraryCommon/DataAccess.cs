@@ -24,6 +24,17 @@ namespace ClassLibraryCommon
             return db.GetRoleId();
         }
 
+        public bool CreateUser(string userName, string password)
+        {
+            List<UserDTO> users = GetUsers();
+            users.Add(new UserDTO(userName, password));
+
+            int userId = users[users.Count - 1].UserId;
+            db.AddUser(userName, password, userId);
+
+            return true;
+        }
+
         public int GetUserId()
         {
             return db.GetUserId();
@@ -59,6 +70,20 @@ namespace ClassLibraryCommon
             }
 
             return roleDtoList;
+        }
+
+        public bool AuthenticateUser(string userName, string password)
+        {
+            List<UserDTO> users = GetUsers();
+            foreach (UserDTO user in users)
+            {
+                if (user.Name.ToString() == userName && user.Password.ToString() == password)
+                {
+                    return true;
+                 }
+            }
+
+            return false;
         }
     }
 }

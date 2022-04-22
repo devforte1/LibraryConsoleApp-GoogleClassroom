@@ -27,7 +27,7 @@ namespace ConsoleLibrary
             Guest = 1,
             Registrant = 2,
             AuthenticatedUser = 3,
-            AuthenticatedAdminUser =4
+            AuthenticatedAdminUser = 4
         }
 
         static int _viewerStatus = 0;
@@ -35,13 +35,15 @@ namespace ConsoleLibrary
 
         static void Main(string[] args)
         {
-            // Get Library Helper application data.
+            // Get Library Helper application data from data store (text files).
             DataAccess dataAccess = new DataAccess();
-            
             List<RoleDTO> roles = dataAccess.GetRoles();
             List<UserDTO> users = dataAccess.GetUsers();
 
-            // TODO: Add GetInventory() method.
+            // Initialize authUserDTO - will be populated on successful login.
+            UserDTO authUser = new UserDTO("", "");
+
+            // TODO: Add Inventory CRUD methods.
             Dictionary<string, string> menuOptions = new Dictionary<string, string>();
             menuOptions.Add("Guest", "g - Browse Library Helper as a guest (limited access).");
             menuOptions.Add("Register", "r - Register for a Library Helper user account.");
@@ -64,80 +66,99 @@ namespace ConsoleLibrary
                 _userSelection = Console.ReadLine();
                 if (_userSelection.Equals("g"))
                 {
-                    // Handle guest action.
+                    // Display guest options.
                     _viewerStatus = (int)ViewerStatus.Guest;
                     Console.Clear();
                     DisplayLibraryHelperVersion();
                     Console.WriteLine(" ");
+                    Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Welcome, Guest.");
+                    Console.ForegroundColor = ConsoleColor.White;
                     DisplayMenuHeader();
                     DisplayGuestMenuOptions(menuOptions);
                 }
                 else if (_userSelection.Equals("r"))
                 {
-                    // Handle register action.
+                    // Initiate user registration.
+                    Console.WriteLine("Enter a Username: ");
+                    string userName = Console.ReadLine();
+
+                    Console.WriteLine("Enter a Password: ");
+                    string password = Console.ReadLine();
+                    dataAccess.CreateUser(userName, password);
                     _viewerStatus = (int)ViewerStatus.Registrant;
                     Console.Clear();
                     DisplayLibraryHelperVersion();
                     Console.WriteLine(" ");
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine($"Welcome, {userName}.");
+                    Console.ForegroundColor = ConsoleColor.White;
                     DisplayMenuHeader();
                     DisplayRegistrantMenuOptions(menuOptions);
                 }
                 else if (_userSelection.Equals("l"))
                 {
-                    // Handle login action.
-                    UserDTO authUser;
-                    bool authStatus = false;
+                    // Initiate user login.
                     Console.WriteLine("Username: ");
                     string userName = Console.ReadLine();
 
                     Console.WriteLine("Password: ");
                     string password = Console.ReadLine();
 
-                    foreach (UserDTO user in users)
+                    bool authValid = dataAccess.AuthenticateUser(userName, password);
+
+                    if (authValid)
                     {
-                        if (user.Name.ToString() == userName && user.Password.ToString() == password)
-                        {
-                            authStatus = true;
-                            authUser = user;
-
-                            _viewerStatus = (int)ViewerStatus.AuthenticatedUser;
-                            Console.Clear();
-                            DisplayLibraryHelperVersion();
-                            Console.WriteLine(" ");
-                            Console.WriteLine($"Welcome, {authUser.Name}.");
-                            DisplayMenuHeader();
-                            DisplayUserMenuOptions(menuOptions, authUser);
-                            break;
-                        }
-                        else
-                        {
-                            _userSelection = "";
-                            Console.Clear();
-                            _viewerStatus = (int)ViewerStatus.Initial;
-
-                        }
+                        _viewerStatus = (int)ViewerStatus.AuthenticatedUser;
+                        Console.Clear();
+                        DisplayLibraryHelperVersion();
+                        Console.WriteLine(" ");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Welcome, {authUser.Name}.");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        DisplayMenuHeader();
+                        DisplayUserMenuOptions(menuOptions, authUser);
                     }
+                    else
+                    {
+                        _viewerStatus = (int)ViewerStatus.Initial;
+                        Console.Clear();
+                        DisplayLibraryHelperVersion();
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("Invalid login credentials.");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        Console.WriteLine(" ");
+                        DisplayMenuHeader();
+                     }
+
                 }
                 else if (_userSelection.Equals("pp"))
                 {
-                    // Handle print profile action.
-                    // if viewerStatus = user or admin.
+                    // Print user profile.
+                    Console.Clear();
+                    DisplayLibraryHelperVersion();
+                    Console.WriteLine(" "); 
+                    DisplayMenuHeader();
+                    DisplayUserMenuOptions(menuOptions, authUser);
+                    Console.ForegroundColor = ConsoleColor.Green;
+                    Console.WriteLine("User Profile:");
+                    Console.WriteLine($"UserName: {authUser.Name} | User ID: {authUser.UserId} | Is Admin? {authUser.IsAdmin}");
+                    Console.ForegroundColor = ConsoleColor.White;
+
                 }
                 else if (_userSelection.Equals("pr"))
                 {
-                    // Handle print roles action.
-                    // if viewerStatus = admin..
+                    // Print Library Helper roles.
+                    DisplayRoles(menuOptions, authUser);
                 }
                 else if (_userSelection.Equals("pu"))
                 {
-                    // Handle print users action.
-                    // if viewerStatus = admin..
+                    // Print active Library Helper users.
+                    DisplayUsers(menuOptions, authUser);
                 }
                 else if (_userSelection.Equals("o"))
                 {
-                    // Handle logout action.
-                    // TODO: Implement Logout() method.
+                    // Log out of Library Helper.
                     _viewerStatus = (int)ViewerStatus.Initial;
                     _userSelection = "";
                     Console.Clear();
@@ -147,12 +168,14 @@ namespace ConsoleLibrary
                 }
                 else if (_userSelection.Equals("x"))
                 {
-                    // Handle application exit action.
+                    // Exit Library Helper application.
                     Environment.Exit(0);
                 }
                 else
                 {
+                    Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Enter a letter combination from the menu to take an action.");
+                    Console.ForegroundColor = ConsoleColor.White;
                 };
 
             } while (_userSelection != "x");
@@ -170,7 +193,7 @@ namespace ConsoleLibrary
             Console.WriteLine(" ");
         }
 
-        private static void DisplayInitialMenuOptions(Dictionary<string,string>menuOptions)
+        private static void DisplayInitialMenuOptions(Dictionary<string, string> menuOptions)
         {
             // Display initial viewer options.
             Console.WriteLine($"{menuOptions["Guest"]}");
@@ -191,18 +214,51 @@ namespace ConsoleLibrary
             Console.WriteLine($"{menuOptions["Exit"]}");
         }
 
-        private static void DisplayUserMenuOptions(Dictionary<string,string> menuOptions,UserDTO user)
+        private static void DisplayUserMenuOptions(Dictionary<string, string> menuOptions, UserDTO user)
         {
-            if (user.IsAdmin)
-            {
-                // Write Admin menu options.
-                Console.WriteLine($"{menuOptions["PrintUsers"]}");
-            }
-            
+            Console.WriteLine($"{menuOptions["PrintUsers"]}");
             Console.WriteLine($"{menuOptions["PrintProfile"]}");
             Console.WriteLine($"{menuOptions["PrintRoles"]}");
             Console.WriteLine($"{menuOptions["Logout"]}");
             Console.WriteLine($"{menuOptions["Exit"]}");
+        }
+
+        private static void DisplayUsers(Dictionary<string, string> menuOptions, UserDTO authUser)
+        {
+            DataAccess dataAccess = new DataAccess();
+            List<UserDTO> users = dataAccess.GetUsers();
+            Console.Clear();
+            DisplayLibraryHelperVersion();
+            DisplayMenuHeader();
+            DisplayUserMenuOptions(menuOptions, authUser);
+            Console.WriteLine(" ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("LibraryHelper Users:");
+            Console.WriteLine(" ");
+            foreach (UserDTO user in users)
+            {
+                Console.WriteLine($"Username: {user.Name}, User ID: {user.UserId}");
+            }
+            Console.ForegroundColor = ConsoleColor.White;
+        }
+
+        private static void DisplayRoles(Dictionary<string, string> menuOptions, UserDTO authUser)
+        {
+            DataAccess dataAccess = new DataAccess();
+            List<RoleDTO> roles = dataAccess.GetRoles();
+            Console.Clear();
+            DisplayLibraryHelperVersion();
+            DisplayMenuHeader();
+            DisplayUserMenuOptions(menuOptions, authUser);
+            Console.WriteLine(" ");
+            Console.ForegroundColor = ConsoleColor.Green;
+            Console.WriteLine("LibraryHelper Roles:");
+            Console.WriteLine(" ");
+            foreach (RoleDTO role in roles)
+            {
+                Console.WriteLine($"Role Name: {role.Name}, Role ID: {role.RoleId}");
+            }
+            Console.ForegroundColor = ConsoleColor.White;
         }
     }
 }
