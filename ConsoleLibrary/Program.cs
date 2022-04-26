@@ -11,6 +11,15 @@ namespace ConsoleLibrary
 {
     public class Program
     {
+        // TODO: Create USER SELECT, DELETE, UPDATE, INSERT stored procedures.
+        // TODO: Create ROLE SELECT, DELETE, UPDATE, INSERT stored procedures.
+        // TODO: Create and integrate Media entity.
+        // TODO: Complete ERD.
+        // 
+        // Update DataAccess to handle SQL database calls.
+        // Update unit tests for SQL unit tests.
+        // Complete ERD.
+        // Create DDL and DML scripts.
         enum MenuOption
         {
             Guest,
@@ -32,6 +41,18 @@ namespace ConsoleLibrary
 
         static int _viewerStatus = 0;
         static string _userSelection = "";
+
+        //static void Main(string[] args)
+        //{
+        //    DataAccess dataAccess = new DataAccess();
+        //    var testSqlDataAccess = dataAccess.TestSqlConnection();
+
+        //    var testLibraryAppSqlDbAccess = dataAccess.TestLibraryAppSqlConnection();
+
+        //    List<UserDTO> users = dataAccess.GetUsers();
+
+        //    dataAccess.GetUsersFromStoredProcedure();
+        //}
 
         static void Main(string[] args)
         {
@@ -129,7 +150,7 @@ namespace ConsoleLibrary
                         Console.ForegroundColor = ConsoleColor.White;
                         Console.WriteLine(" ");
                         DisplayMenuHeader();
-                     }
+                    }
 
                 }
                 else if (_userSelection.Equals("pp"))
@@ -137,7 +158,7 @@ namespace ConsoleLibrary
                     // Print user profile.
                     Console.Clear();
                     DisplayLibraryHelperVersion();
-                    Console.WriteLine(" "); 
+                    Console.WriteLine(" ");
                     DisplayMenuHeader();
                     DisplayUserMenuOptions(menuOptions, authUser);
                     Console.ForegroundColor = ConsoleColor.Green;
@@ -183,7 +204,7 @@ namespace ConsoleLibrary
 
         private static void DisplayLibraryHelperVersion()
         {
-            Console.WriteLine("Library Helper v1.0");
+            Console.WriteLine("Library Helper v2.0");
             Console.WriteLine(" ");
         }
 

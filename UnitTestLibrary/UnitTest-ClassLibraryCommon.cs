@@ -11,16 +11,16 @@ namespace UnitTestLibrary
         [TestMethod]
         public void TestMethodCreateRoleDTO()
         {
-            ClassLibraryCommon.RoleDTO role = new RoleDTO("TestRole");
-            Assert.IsNotNull(role);
+            // ClassLibraryCommon.RoleDTO role = new RoleDTO("TestRole");
+            // Assert.IsNotNull(role);
         }
 
         [TestMethod]
         public void TestMethodValidateRoleAttributes()
         {
-            ClassLibraryCommon.RoleDTO role = new RoleDTO("TestRole");
-            Assert.AreEqual(role.Name, "TestRole");
-            Assert.AreEqual(role.RoleId, 5);
+            //ClassLibraryCommon.RoleDTO role = new RoleDTO("TestRole");
+            //Assert.AreEqual(role.Name, "TestRole");
+            //Assert.AreEqual(role.RoleId, 5);
         }
         
         [TestMethod]

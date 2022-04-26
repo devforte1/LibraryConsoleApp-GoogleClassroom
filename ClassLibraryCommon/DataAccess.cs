@@ -11,7 +11,8 @@ namespace ClassLibraryCommon
 {
     public class DataAccess
     {
-        MockDb db = new MockDb();
+        // MockDb db = new MockDb();
+        SqlServerDb db = new SqlServerDb();
         
         private List<string[]> userList = new List<string[]>();
         private List<string[]> roleList = new List<string[]>();
@@ -19,10 +20,10 @@ namespace ClassLibraryCommon
         private List<UserDTO> userDtoList = new List<UserDTO>();
         private List<RoleDTO> roleDtoList = new List<RoleDTO>();
 
-        public int GetRoleId()
-        {
-            return db.GetRoleId();
-        }
+        //public int GetRoleId()
+        //{
+        //    return db.GetRoleId();
+        //}
 
         public bool CreateUser(string userName, string password)
         {
@@ -30,14 +31,15 @@ namespace ClassLibraryCommon
             users.Add(new UserDTO(userName, password));
 
             int userId = users[users.Count - 1].UserId;
-            db.AddUser(userName, password, userId);
+            // db.AddUser(userName, password, userId);
 
             return true;
         }
 
         public int GetUserId()
         {
-            return db.GetUserId();
+            // return db.GetUserId();
+            throw new NotImplementedException();
         }
 
         public List<UserDTO> GetUsers()
@@ -46,27 +48,47 @@ namespace ClassLibraryCommon
  
             foreach (String[] user in userList)
             {
-                var item1 = user[0];
-                var item2 = user[1];
-                var item3 = user[2];
+                var _userId = user[0];
+                var _userName = user[1];
+                var _password = user[2];
+                var _isAdmin = user[3];
 
-                UserDTO userDTO = new UserDTO(item1, item2, int.Parse(item3));
+                UserDTO userDTO = new UserDTO(_userName, _password, int.Parse(_userId),bool.Parse(_isAdmin));
                 userDtoList.Add(userDTO);
             }
 
             return userDtoList;
         }
 
+        public bool GetUsersFromStoredProcedure()
+        {
+            bool result = db.TestLibraryAppStoredProcedure();
+
+            //foreach (String[] user in userList)
+            //{
+            //    var _userId = user[0];
+            //    var _userName = user[1];
+            //    var _password = user[2];
+            //    var _isAdmin = user[3];
+
+            //    UserDTO userDTO = new UserDTO(_userName, _password, int.Parse(_userId), bool.Parse(_isAdmin));
+            //    userDtoList.Add(userDTO);
+            //}
+
+            //return userDtoList;
+            return true;
+        }
+
         public List<RoleDTO> GetRoles()
         {
-            roleList = db.GetRoles();
+           //  roleList = db.GetRoles();
 
             foreach (Object role in roleList)
             {
                 Console.WriteLine(role);
                 string[] roleItem = (string[])role;
 
-                roleDtoList.Add(new RoleDTO(roleItem[0], int.Parse(roleItem[1])));
+                // roleDtoList.Add(new RoleDTO(roleItem[0], int.Parse(roleItem[1])));
             }
 
             return roleDtoList;
@@ -84,6 +106,25 @@ namespace ClassLibraryCommon
             }
 
             return false;
+        }
+
+        public bool TestSqlConnection()
+        {
+            SqlServerDb db = new SqlServerDb();
+
+            bool dbConnectResult = db.TestSqlConnection();
+
+            return dbConnectResult;
+
+        }
+
+        public bool TestLibraryAppSqlConnection()
+        {
+            SqlServerDb db = new SqlServerDb();
+
+            bool dbConnectResult = db.TestLibraryAppSqlDbAccess();
+
+            return dbConnectResult;
         }
     }
 }

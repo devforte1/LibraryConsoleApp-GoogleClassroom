@@ -50,7 +50,6 @@ namespace ClassLibraryDatabase
             return userList;
         }
 
-
         public List<string[]> GetRoles()
         {
             List<string[]> roleList = new List<string[]>();
