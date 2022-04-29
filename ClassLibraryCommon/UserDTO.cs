@@ -21,21 +21,12 @@ namespace ClassLibraryCommon
         public string Password { get => _password; set => _password = value; }
         public bool IsAdmin { get => _isAdmin; set => _isAdmin = value; }
 
-        public UserDTO(string userName,string password,int userId=0,bool isAdmin=false)
+        public UserDTO(int userId, string userName,string password,bool isAdmin=false)
         {
+            _userId = userId;
             _userName = userName;
             _password = password;
             _isAdmin = isAdmin;
-
-            if (userId == 0)
-            {
-                _userId = dataAccess.GetUserId();
-            }
-            else
-            {
-                _userId = userId;
-            }
-            
         }
     }
 }

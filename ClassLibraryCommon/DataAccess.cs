@@ -11,87 +11,82 @@ namespace ClassLibraryCommon
 {
     public class DataAccess
     {
-        // MockDb db = new MockDb();
         SqlServerDb db = new SqlServerDb();
-        
+
         private List<string[]> userList = new List<string[]>();
         private List<string[]> roleList = new List<string[]>();
+        private List<string> mediaList = new List<string>();
 
         private List<UserDTO> userDtoList = new List<UserDTO>();
         private List<RoleDTO> roleDtoList = new List<RoleDTO>();
-
-        //public int GetRoleId()
-        //{
-        //    return db.GetRoleId();
-        //}
+        private List<MediaDTO> mediaDtoList = new List<MediaDTO>();
 
         public bool CreateUser(string userName, string password)
         {
-            List<UserDTO> users = GetUsers();
-            users.Add(new UserDTO(userName, password));
+            bool result = db.InsertUser(userName, password, false);
+            if (result)
+            {
+                userDtoList = GetUsers();
+            }
 
-            int userId = users[users.Count - 1].UserId;
-            // db.AddUser(userName, password, userId);
-
-            return true;
+            return result;
         }
 
-        public int GetUserId()
+        public bool CreateRole(string roleName)
         {
-            // return db.GetUserId();
-            throw new NotImplementedException();
+            bool result = db.InsertRole(roleName);
+            return result;
+        }
+
+        public bool CreateMediaItem(string mediaType, string mediaName)
+        {
+            bool result = db.InsertMedia(mediaType, mediaName);
+            return result;
         }
 
         public List<UserDTO> GetUsers()
         {
-            userList = db.GetUsers();
- 
+            userList = db.SelectUsers();
+
             foreach (String[] user in userList)
             {
-                var _userId = user[0];
-                var _userName = user[1];
-                var _password = user[2];
-                var _isAdmin = user[3];
+                int _userId = int.Parse(user[0]);
+                string _userName = user[1];
+                string _password = user[2];
+                bool _isAdmin = bool.Parse(user[3]);
 
-                UserDTO userDTO = new UserDTO(_userName, _password, int.Parse(_userId),bool.Parse(_isAdmin));
+                UserDTO userDTO = new UserDTO(_userId, _userName, _password, _isAdmin);
                 userDtoList.Add(userDTO);
             }
 
             return userDtoList;
         }
 
-        public bool GetUsersFromStoredProcedure()
-        {
-            bool result = db.TestLibraryAppStoredProcedure();
-
-            //foreach (String[] user in userList)
-            //{
-            //    var _userId = user[0];
-            //    var _userName = user[1];
-            //    var _password = user[2];
-            //    var _isAdmin = user[3];
-
-            //    UserDTO userDTO = new UserDTO(_userName, _password, int.Parse(_userId), bool.Parse(_isAdmin));
-            //    userDtoList.Add(userDTO);
-            //}
-
-            //return userDtoList;
-            return true;
-        }
-
         public List<RoleDTO> GetRoles()
         {
-           //  roleList = db.GetRoles();
+            roleList = db.SelectRoles();
 
             foreach (Object role in roleList)
             {
                 Console.WriteLine(role);
                 string[] roleItem = (string[])role;
 
-                // roleDtoList.Add(new RoleDTO(roleItem[0], int.Parse(roleItem[1])));
+                roleDtoList.Add(new RoleDTO(int.Parse(roleItem[0]), roleItem[1]));
             }
 
             return roleDtoList;
+        }
+
+        public bool CheckOutMediaItem(int userId, int mediaId)
+        {
+            bool result = db.CheckOutMedia(userId, mediaId);
+            return result;
+        }
+
+        public bool CheckInMediaItem(int userId, int mediaId)
+        {
+            bool result = db.CheckOutMedia(userId, mediaId);
+            return result;
         }
 
         public bool AuthenticateUser(string userName, string password)
@@ -102,29 +97,36 @@ namespace ClassLibraryCommon
                 if (user.Name.ToString() == userName && user.Password.ToString() == password)
                 {
                     return true;
-                 }
+                }
             }
 
             return false;
         }
 
-        public bool TestSqlConnection()
+        public bool ValidateUniqueUserName(string userName)
         {
-            SqlServerDb db = new SqlServerDb();
-
-            bool dbConnectResult = db.TestSqlConnection();
-
-            return dbConnectResult;
-
+            bool result = db.ValidateUniqueUser(userName);
+            return result;
         }
 
-        public bool TestLibraryAppSqlConnection()
+        public bool RegisterUser(string userName, string password)
         {
-            SqlServerDb db = new SqlServerDb();
+            bool result = ValidateUniqueUserName(userName);
+            if (result)
+            {
+                db.InsertUser(userName, password, false);
+            }
 
-            bool dbConnectResult = db.TestLibraryAppSqlDbAccess();
+            return result;
+        }
 
-            return dbConnectResult;
+        public string[] GetUserByUserName(string userName)
+        {
+            string[] result = new string[4];
+
+            result = db.SelectUserByUserName(userName);
+
+            return result;
         }
     }
 }

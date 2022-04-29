@@ -37,6 +37,7 @@ namespace ClassLibraryDatabase
                     {
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Unable to access User datastore.");
+                        Console.WriteLine(ex.Message);
                         Console.ForegroundColor = ConsoleColor.White;
                     }
                     finally
@@ -72,6 +73,7 @@ namespace ClassLibraryDatabase
                 {
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Unable to access Roles datastore.");
+                    Console.WriteLine(ex.Message.Trim());
                     Console.ForegroundColor = ConsoleColor.White;
                 }
                 finally

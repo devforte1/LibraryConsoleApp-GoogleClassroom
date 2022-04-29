@@ -5,21 +5,14 @@ using System.Text;
 using System.Threading.Tasks;
 
 using ClassLibraryCommon;
-using ClassLibraryDatabase;
 
 namespace ConsoleLibrary
 {
     public class Program
     {
-        // TODO: Create USER SELECT, DELETE, UPDATE, INSERT stored procedures.
-        // TODO: Create ROLE SELECT, DELETE, UPDATE, INSERT stored procedures.
-        // TODO: Create and integrate Media entity.
-        // TODO: Complete ERD.
-        // 
-        // Update DataAccess to handle SQL database calls.
-        // Update unit tests for SQL unit tests.
-        // Complete ERD.
-        // Create DDL and DML scripts.
+        // TODO: Update unit tests for ClassLibraryCommon.
+        // TODO: Update ConsoleLibrary to implement new features.
+ 
         enum MenuOption
         {
             Guest,
@@ -39,21 +32,9 @@ namespace ConsoleLibrary
             AuthenticatedAdminUser = 4
         }
 
-        static int _viewerStatus = 0;
+        static ViewerStatus _viewerStatus = ViewerStatus.Initial;
         static string _userSelection = "";
-
-        //static void Main(string[] args)
-        //{
-        //    DataAccess dataAccess = new DataAccess();
-        //    var testSqlDataAccess = dataAccess.TestSqlConnection();
-
-        //    var testLibraryAppSqlDbAccess = dataAccess.TestLibraryAppSqlConnection();
-
-        //    List<UserDTO> users = dataAccess.GetUsers();
-
-        //    dataAccess.GetUsersFromStoredProcedure();
-        //}
-
+        
         static void Main(string[] args)
         {
             // Get Library Helper application data from data store (text files).
@@ -61,10 +42,10 @@ namespace ConsoleLibrary
             List<RoleDTO> roles = dataAccess.GetRoles();
             List<UserDTO> users = dataAccess.GetUsers();
 
-            // Initialize authUserDTO - will be populated on successful login.
-            UserDTO authUser = new UserDTO("", "");
+            
+            bool authValid = false;
+            string[] authUser = new string[4]; // Initialize authUser - will be populated on successful login.
 
-            // TODO: Add Inventory CRUD methods.
             Dictionary<string, string> menuOptions = new Dictionary<string, string>();
             menuOptions.Add("Guest", "g - Browse Library Helper as a guest (limited access).");
             menuOptions.Add("Register", "r - Register for a Library Helper user account.");
@@ -78,25 +59,29 @@ namespace ConsoleLibrary
 
             Console.Clear();
             DisplayLibraryHelperVersion();
-            DisplayMenuHeader();
-
+            
             do
             {
-                if (_viewerStatus == (int)ViewerStatus.Initial) { DisplayInitialMenuOptions(menuOptions); }
+                if (_viewerStatus == ViewerStatus.Initial) 
+                { 
+                    DisplayInitialMenuOptions(menuOptions);
+                    DisplayMenuPrompt();
+                  }
 
                 _userSelection = Console.ReadLine();
                 if (_userSelection.Equals("g"))
                 {
                     // Display guest options.
-                    _viewerStatus = (int)ViewerStatus.Guest;
+                    _viewerStatus = ViewerStatus.Guest;
                     Console.Clear();
                     DisplayLibraryHelperVersion();
                     Console.WriteLine(" ");
                     Console.ForegroundColor = ConsoleColor.Green;
                     Console.WriteLine("Welcome, Guest.");
+                    Console.WriteLine(" ");
                     Console.ForegroundColor = ConsoleColor.White;
-                    DisplayMenuHeader();
                     DisplayGuestMenuOptions(menuOptions);
+                    DisplayMenuPrompt();
                 }
                 else if (_userSelection.Equals("r"))
                 {
@@ -105,17 +90,41 @@ namespace ConsoleLibrary
                     string userName = Console.ReadLine();
 
                     Console.WriteLine("Enter a Password: ");
-                    string password = Console.ReadLine();
-                    dataAccess.CreateUser(userName, password);
-                    _viewerStatus = (int)ViewerStatus.Registrant;
-                    Console.Clear();
-                    DisplayLibraryHelperVersion();
-                    Console.WriteLine(" ");
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine($"Welcome, {userName}.");
-                    Console.ForegroundColor = ConsoleColor.White;
-                    DisplayMenuHeader();
-                    DisplayRegistrantMenuOptions(menuOptions);
+                    string password = null;
+                    while (true)
+                    {
+                        var key = System.Console.ReadKey(true);
+                        if (key.Key == ConsoleKey.Enter)
+                            break;
+                        password += key.KeyChar;
+                    }
+
+                    bool result = dataAccess.ValidateUniqueUserName(userName);
+                    if (result)
+                    {
+                        dataAccess.CreateUser(userName, password);
+
+                        _viewerStatus = ViewerStatus.Registrant;
+                        Console.Clear();
+                        DisplayLibraryHelperVersion();
+                        Console.WriteLine(" ");
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine($"Welcome, Registrant {userName}.");
+                        Console.WriteLine(" ");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        DisplayRegistrantMenuOptions(menuOptions);
+                        DisplayMenuPrompt();
+                    }
+                    else
+                    {
+                        Console.Clear();
+                        DisplayLibraryHelperVersion();
+                        Console.ForegroundColor = ConsoleColor.Red;
+                        Console.WriteLine("The entered user name is not available. Please register with a different user name.");
+                        Console.WriteLine(" ");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        DisplayMenuPrompt();
+                    }
                 }
                 else if (_userSelection.Equals("l"))
                 {
@@ -124,50 +133,61 @@ namespace ConsoleLibrary
                     string userName = Console.ReadLine();
 
                     Console.WriteLine("Password: ");
-                    string password = Console.ReadLine();
+                    string password = null;
+                    while (true)
+                    {
+                        var key = System.Console.ReadKey(true);
+                        if (key.Key == ConsoleKey.Enter)
+                            break;
+                        password += key.KeyChar;
+                    }
 
-                    bool authValid = dataAccess.AuthenticateUser(userName, password);
+                    authValid = dataAccess.AuthenticateUser(userName, password);
 
                     if (authValid)
                     {
-                        _viewerStatus = (int)ViewerStatus.AuthenticatedUser;
+                        _viewerStatus = ViewerStatus.AuthenticatedUser;
+                        authUser = dataAccess.GetUserByUserName(userName);
                         Console.Clear();
                         DisplayLibraryHelperVersion();
                         Console.WriteLine(" ");
                         Console.ForegroundColor = ConsoleColor.Green;
-                        Console.WriteLine($"Welcome, {authUser.Name}.");
+                        Console.WriteLine($"Welcome, User {userName}.");
+                        Console.WriteLine(" ");
                         Console.ForegroundColor = ConsoleColor.White;
-                        DisplayMenuHeader();
-                        DisplayUserMenuOptions(menuOptions, authUser);
+                        DisplayUserMenuOptions(menuOptions,authUser);
+                        DisplayMenuPrompt();
                     }
                     else
                     {
-                        _viewerStatus = (int)ViewerStatus.Initial;
+                        _viewerStatus = ViewerStatus.Initial;
                         Console.Clear();
                         DisplayLibraryHelperVersion();
                         Console.ForegroundColor = ConsoleColor.Red;
                         Console.WriteLine("Invalid login credentials.");
                         Console.ForegroundColor = ConsoleColor.White;
                         Console.WriteLine(" ");
-                        DisplayMenuHeader();
+                        DisplayMenuPrompt();
                     }
 
                 }
-                else if (_userSelection.Equals("pp"))
+                else if (_userSelection.Equals("pp") && authValid)
                 {
-                    // Print user profile.
-                    Console.Clear();
-                    DisplayLibraryHelperVersion();
-                    Console.WriteLine(" ");
-                    DisplayMenuHeader();
-                    DisplayUserMenuOptions(menuOptions, authUser);
-                    Console.ForegroundColor = ConsoleColor.Green;
-                    Console.WriteLine("User Profile:");
-                    Console.WriteLine($"UserName: {authUser.Name} | User ID: {authUser.UserId} | Is Admin? {authUser.IsAdmin}");
-                    Console.ForegroundColor = ConsoleColor.White;
-
+                    if (authValid)
+                    {
+                        // Print user profile.
+                        Console.Clear();
+                        DisplayLibraryHelperVersion();
+                        Console.WriteLine(" ");
+                        DisplayUserMenuOptions(menuOptions, authUser);
+                        Console.ForegroundColor = ConsoleColor.Green;
+                        Console.WriteLine("User Profile:");
+                        Console.WriteLine($"UserName: {authUser[1]} | User ID: {authUser[0]} | Is Admin? {authUser[3]}");
+                        Console.ForegroundColor = ConsoleColor.White;
+                        DisplayMenuPrompt();
+                    }
                 }
-                else if (_userSelection.Equals("pr"))
+                else if (_userSelection.Equals("pr") && authValid)
                 {
                     // Print Library Helper roles.
                     DisplayRoles(menuOptions, authUser);
@@ -177,7 +197,7 @@ namespace ConsoleLibrary
                     // Print active Library Helper users.
                     DisplayUsers(menuOptions, authUser);
                 }
-                else if (_userSelection.Equals("o"))
+                else if (_userSelection.Equals("o") && authValid )
                 {
                     // Log out of Library Helper.
                     _viewerStatus = (int)ViewerStatus.Initial;
@@ -185,7 +205,7 @@ namespace ConsoleLibrary
                     Console.Clear();
                     DisplayLibraryHelperVersion();
                     Console.WriteLine(" ");
-                    DisplayMenuHeader();
+                    DisplayMenuPrompt();
                 }
                 else if (_userSelection.Equals("x"))
                 {
@@ -194,12 +214,17 @@ namespace ConsoleLibrary
                 }
                 else
                 {
+                    Console.Clear();
+                    DisplayLibraryHelperVersion();
                     Console.ForegroundColor = ConsoleColor.Red;
                     Console.WriteLine("Enter a letter combination from the menu to take an action.");
                     Console.ForegroundColor = ConsoleColor.White;
+                    DisplayMenuPrompt();
                 };
 
             } while (_userSelection != "x");
+
+            DisplayMenuPrompt();
         }
 
         private static void DisplayLibraryHelperVersion()
@@ -208,8 +233,9 @@ namespace ConsoleLibrary
             Console.WriteLine(" ");
         }
 
-        private static void DisplayMenuHeader()
+        private static void DisplayMenuPrompt()
         {
+            Console.WriteLine(" ");
             Console.WriteLine("Enter one of the displayed letter combinations to select an action:");
             Console.WriteLine(" ");
         }
@@ -235,7 +261,7 @@ namespace ConsoleLibrary
             Console.WriteLine($"{menuOptions["Exit"]}");
         }
 
-        private static void DisplayUserMenuOptions(Dictionary<string, string> menuOptions, UserDTO user)
+        private static void DisplayUserMenuOptions(Dictionary<string, string> menuOptions, string[] user)
         {
             Console.WriteLine($"{menuOptions["PrintUsers"]}");
             Console.WriteLine($"{menuOptions["PrintProfile"]}");
@@ -244,13 +270,12 @@ namespace ConsoleLibrary
             Console.WriteLine($"{menuOptions["Exit"]}");
         }
 
-        private static void DisplayUsers(Dictionary<string, string> menuOptions, UserDTO authUser)
+        private static void DisplayUsers(Dictionary<string, string> menuOptions, string[] authUser)
         {
             DataAccess dataAccess = new DataAccess();
             List<UserDTO> users = dataAccess.GetUsers();
             Console.Clear();
             DisplayLibraryHelperVersion();
-            DisplayMenuHeader();
             DisplayUserMenuOptions(menuOptions, authUser);
             Console.WriteLine(" ");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -261,15 +286,15 @@ namespace ConsoleLibrary
                 Console.WriteLine($"Username: {user.Name}, User ID: {user.UserId}");
             }
             Console.ForegroundColor = ConsoleColor.White;
+            DisplayMenuPrompt();
         }
 
-        private static void DisplayRoles(Dictionary<string, string> menuOptions, UserDTO authUser)
+        private static void DisplayRoles(Dictionary<string, string> menuOptions, string[] authUser)
         {
             DataAccess dataAccess = new DataAccess();
             List<RoleDTO> roles = dataAccess.GetRoles();
             Console.Clear();
             DisplayLibraryHelperVersion();
-            DisplayMenuHeader();
             DisplayUserMenuOptions(menuOptions, authUser);
             Console.WriteLine(" ");
             Console.ForegroundColor = ConsoleColor.Green;
@@ -280,6 +305,7 @@ namespace ConsoleLibrary
                 Console.WriteLine($"Role Name: {role.Name}, Role ID: {role.RoleId}");
             }
             Console.ForegroundColor = ConsoleColor.White;
+            DisplayMenuPrompt();
         }
     }
 }
